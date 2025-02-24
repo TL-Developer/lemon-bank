@@ -1,2 +1,6 @@
 # lemon-bank
-Corretora Lemon Bank
+
+
+## DESENHO ARQUITETURA DO PROJETO
+
+![alt text](image.png)
