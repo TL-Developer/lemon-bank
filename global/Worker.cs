@@ -8,12 +8,14 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IConsumer<string, string> _consumer;
-    private readonly string _topic = "test-topic";
+    private readonly Producer _producer;
+    private readonly string _topic = "b3-variable-income-topic";
     private readonly string _bootstrapServers;
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration)
+    public Worker(ILogger<Worker> logger, IConfiguration configuration, Producer producer)
     {
         _logger = logger;
+        _producer = producer;
         _bootstrapServers = configuration["Kafka:BootstrapServers"] ?? "kafka:29092";
         
         var config = new ConsumerConfig
@@ -41,14 +43,26 @@ public class Worker : BackgroundService
                     
                     if (consumeResult?.Message?.Value != null)
                     {
-                        _logger.LogInformation("Received message: {Message}", consumeResult.Message.Value);
-                        
-                        // Process the message here
-                        // For example, you could deserialize the JSON message
-                        // var message = JsonSerializer.Deserialize<YourMessageType>(consumeResult.Message.Value);
-                        
-                        // Commit the offset after successful processing
-                        _consumer.Commit(consumeResult);
+                        try
+                        {
+                            _logger.LogInformation("Received message: {Message}", consumeResult.Message.Value);
+                            
+                            // Process the message and send to income topic
+                            await _producer.ProduceAsync(
+                                consumeResult.Message.Key ?? "default-key",
+                                consumeResult.Message.Value
+                            );
+                            
+                            // Commit the offset after successful processing
+                            _consumer.Commit(consume);
+                            _logger.LogInformation("Successfully processed and committed message");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error processing message: {Message}", consumeResult.Message.Value);
+                            // Don't commit the offset if processing failed
+                            throw;
+                        }
                     }
                 }
                 catch (ConsumeException ex)

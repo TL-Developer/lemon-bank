@@ -6,7 +6,7 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IProducer<string, string> _producer;
-    private readonly string _topic = "test-topic";
+    private readonly string _topic = "b3-variable-income-topic";
     private decimal _currentPrice = 175.50m;
     private readonly Random _random = new Random();
     private readonly IConfiguration _configuration;
