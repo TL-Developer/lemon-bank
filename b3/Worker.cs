@@ -9,14 +9,16 @@ public class Worker : BackgroundService
     private readonly string _topic = "test-topic";
     private decimal _currentPrice = 175.50m;
     private readonly Random _random = new Random();
+    private readonly IConfiguration _configuration;
 
-    public Worker(ILogger<Worker> logger)
+    public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
         _logger = logger;
+        _configuration = configuration;
         
         var config = new ProducerConfig
         {
-            BootstrapServers = "kafka:29092",
+            BootstrapServers = _configuration["Kafka:BootstrapServers"],
             ClientId = "b3-worker"
         };
         
@@ -65,7 +67,7 @@ public class Worker : BackgroundService
                     _logger.LogError(ex, "Error producing message to Kafka");
                 }
             }
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(5000, stoppingToken);
         }
     }
 

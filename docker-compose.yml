@@ -42,7 +42,18 @@ services:
     build:
       context: ./b3
       dockerfile: Dockerfile
-    container_name: b3
+    container_name: dotnet-b3
+    depends_on:
+      - kafka
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kafka__BootstrapServers=kafka:29092
+
+  dotnet-global:
+    build:
+      context: ./global
+      dockerfile: Dockerfile
+    container_name: dotnet-global
     depends_on:
       - kafka
     environment:

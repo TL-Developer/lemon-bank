@@ -3,17 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies
-COPY ["b3.csproj", "./"]
+COPY ["global.csproj", "./"]
 RUN dotnet restore
 
 # Copy the rest of the code
 COPY . .
 
 # Build the application
-RUN dotnet build "b3.csproj" -c Release -o /app/build
+RUN dotnet build "global.csproj" -c Release -o /app/build
 
 # Publish the application
-RUN dotnet publish "b3.csproj" -c Release -o /app/publish
+RUN dotnet publish "global.csproj" -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
@@ -25,8 +25,5 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 ENV Kafka__BootstrapServers=kafka:29092
 
-# Expose port (if needed)
-# EXPOSE 80
-
 # Start the application
-ENTRYPOINT ["dotnet", "b3.dll"] 
+ENTRYPOINT ["dotnet", "global.dll"] 
